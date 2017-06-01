@@ -419,3 +419,4 @@ public class NetworkManager extends CordovaPlugin {
         }
     };
 }
+
