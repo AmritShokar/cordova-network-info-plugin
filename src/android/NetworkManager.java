@@ -92,11 +92,11 @@ public class NetworkManager extends CordovaPlugin {
     BroadcastReceiver receiver;
     private JSONObject lastInfo = null;
     WifiManager wifiMan;
-    boolean keepSatEnabled; // Used when no cellular is present
-    int satNetId; // Id of satellite WiFi connection
-    boolean mobileDataEnabled = false; // Assume disabled
     Handler handler; // Initiated when there is no cellular present
-    boolean handlerCheckEnabled = false; // Indicates when to use handler
+    private boolean keepSatEnabled; // Used when no cellular is present
+    private boolean mobileDataEnabled = false; // Assume disabled
+    private boolean handlerCheckEnabled = false; // Indicates when to use handler
+    private int satNetId; // Id of satellite WiFi connection
 
     // Custom configuration settings
     private final String satSSID = "exp00227"; // Satellite SSID
