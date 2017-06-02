@@ -101,7 +101,7 @@ public class NetworkManager extends CordovaPlugin {
     // Custom configuration settings
     private final String satSSID = "exp00227"; // Satellite SSID
     private final String satPass = "12345678"; // Satellite Password
-    private final int handlerDelay = 40000; // Run handler every 40 secs
+    private final int handlerDelay = 50000; // Run handler every 40 secs
 
     /**
      * Sets the context of the Command. This can then be used to do things like
@@ -240,16 +240,16 @@ public class NetworkManager extends CordovaPlugin {
         Log.d("WifiPreference", "updateConnectionInfo: MobileDataEnabled: "+mobileDataEnabled);
         // Run handler logic when standard WiFi not active or when mobile data not available
         //if (sockMan.getActiveNetworkInfo() != null) { // returns null when no active connection
-            if (!mobileDataEnabled) {
-                // Enable handler or keep handler running
-                handlerCheckEnabled = true;
-                Log.d("WifiPreference", "handlerCheck was just renabled");
-            } else {
-                // Handler disabled only when both standard WiFi is active and cellular is available
-                // Disable handler or keep handler disabled
-                handlerCheckEnabled = false;
-                Log.d("WifiPreference", "handlerCheck was just disabled");
-            }
+        if (!mobileDataEnabled) {
+            // Enable handler or keep handler running
+            handlerCheckEnabled = true;
+            Log.d("WifiPreference", "handlerCheck was just renabled");
+        } else {
+            // Handler disabled only when both standard WiFi is active and cellular is available
+            // Disable handler or keep handler disabled
+            handlerCheckEnabled = false;
+            Log.d("WifiPreference", "handlerCheck was just disabled");
+        }
         //}
     }
 
@@ -353,59 +353,53 @@ public class NetworkManager extends CordovaPlugin {
     }
 
     /**
-     * Check for cor mobile data regardless of current active connection
+     * When cellular data is absent, handler method will periodicely attempt to restablish cellular connection
+     * Satellite hotspot will be used but standard WiFi is be preferred over satellite whenever possible
      */
     public void checkCellularConnection() {
-        //Log.d("WifiPreference", "SEE THIS: handler checking cellular state");
-        //Log.d("WifiPreference", "Current list of configured networks: "+wifiMan.getConfiguredNetworks());
-        // Check current state of cellular connection
+        // If no cellular, attempt to restablish connection
         if (handlerCheckEnabled) {
-            Log.d("WifiPreference", "SEE THIS: handler checking cellular state");
+            Log.d("WifiPreference", "handler checking cellular state");
             try {
                 Class cmClass = Class.forName(sockMan.getClass().getName());
                 Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
                 method.setAccessible(true); // Make the method callable
-                // get the setting for "mobile data"
+                // Update mobileDataEnabled if cellular state has changed
                 mobileDataEnabled = (Boolean) method.invoke(sockMan);
             } catch (Exception e) {
                 Log.d("WifiPreference", "Cellular availability check failed");
             }
 
-            //if(mobileDataEnabled != prevMobileDataEnabled) {
-            // Disable satellite WiFi if cellular is available
+            // Disable satellite WiFi and handler method if cellular is available
             if (mobileDataEnabled) {
                 wifiMan.disableNetwork(satNetId);
                 handlerCheckEnabled = false;
-                //Log.d("WifiPreference", "Satellite WiFi network disabled");
-            } else {
+                Log.d("WifiPreference", "Satellite WiFi AP disabled");
+            } else { // Otherwise check for other standard WiFi
                 wifiMan.disconnect();
                 keepSatEnabled = true;
+                // Check preconfigured WiFi APs for availability
                 for (WifiConfiguration configNet: wifiMan.getConfiguredNetworks()) {
-                    //Log.d("SatConfig", configNet.BSSID + " : " + configNet.SSID);
                     boolean delTemp;
                     if (configNet.BSSID != null)
                         delTemp = true;
                     else
                         delTemp = false;
-                    Log.d("SatConfig", configNet.BSSID+" : "+configNet.SSID+" : "+!configNet.SSID.equals("\"exp00227\"")+" : "+delTemp);
-                    if (configNet.BSSID != null && !configNet.SSID.equals("\"exp00227\"")) {
+                    Log.d("WifiPreference", configNet.BSSID+" : "+configNet.SSID+" : "+!configNet.SSID.equals("\""+satSSID+"\"")+" : "+delTemp);
+                    // If preconfigured WiFi available disable satellite AP
+                    if (configNet.BSSID != null && !configNet.SSID.equals("\""+satSSID+"\"")) {
                         wifiMan.disableNetwork(satNetId);
                         keepSatEnabled = false;
                     }
                 }
-
+                // If preconfigured WiFi not available renable satellite WiFI AP
                 if (keepSatEnabled) {
                     wifiMan.enableNetwork(satNetId, true);
+                    Log.d("WifiPreference", "Satellite WiFi AP enabled");
                 }
-
                 wifiMan.reconnect();
-                //Log.d("WifiPreference", "Satellite WiFi network enabled");
             }
-            //prevMobileDataEnabled = mobileDataEnabled;
-            //}
         }
-
-        //Log.d("WifiPreference","Scan Results: "+wifiMan.getScanResults());
     }
 
     /**
@@ -415,7 +409,7 @@ public class NetworkManager extends CordovaPlugin {
         @Override
         public void run() {
             checkCellularConnection();
-            handler.postDelayed(this, handlerDelay); // Check again after every 10 seconds
+            handler.postDelayed(this, handlerDelay); // Check again after every 50 seconds
         }
     };
 }
