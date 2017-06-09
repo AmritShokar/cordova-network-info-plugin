@@ -105,7 +105,7 @@ public class NetworkManager extends CordovaPlugin {
 
     // Custom configuration settings
     private final String satSSID = "exp"; // Satellite SSID
-    private final int handlerDelay = 30000; // Run handler every 40 secs
+    private final int handlerDelay = 50000; // Run handler every 40 secs
 
     /**
      * Sets the context of the Command. This can then be used to do things like
@@ -452,6 +452,7 @@ public class NetworkManager extends CordovaPlugin {
                 if (checkCellularEnabled()) {
                     // Check if cellular data is suspended (loss of cellular network)
                     wifiMan.setWifiEnabled(false);
+                    // Used to repeat handler check in order to allow time for configured networks to update
                     if (handlerCellCheckEnabled) {
                         handlerCellCheckEnabled = false;
                         handler.postDelayed(this, 3000); // After WiFi updates check
