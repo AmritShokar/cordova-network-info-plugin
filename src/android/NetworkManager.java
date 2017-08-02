@@ -107,6 +107,8 @@ public class NetworkManager extends CordovaPlugin {
     private final String satSSID = "exp"; // Satellite SSID
     private final int handlerDelay = 50000; // Run handler every 40 secs
 
+    private boolean satDisabled = true;
+
     /**
      * Sets the context of the Command. This can then be used to do things like
      * get file paths associated with the Activity.
@@ -142,6 +144,7 @@ public class NetworkManager extends CordovaPlugin {
                 wifiMan.disableNetwork(preconfigDisInit.networkId);
             }
         }
+        satDisabled = true; // satellites are initally disabled;
 
         // Initialize timed handler which checks for cellular network availability
         handler = new Handler();
@@ -258,14 +261,16 @@ public class NetworkManager extends CordovaPlugin {
             // Disable handler or keep handler disabled
             handlerCheckEnabled = false;
             // Disable satellite AP again if WiFi toggled back on
-            if (wifiMan.getConfiguredNetworks() != null) {
-                for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                    if (preconfigDis.SSID.contains(satSSID)) {
-                        Log.d("WifiPreference", "2) disabling "+preconfigDis.SSID);
-                        wifiMan.disableNetwork(preconfigDis.networkId);
+            if(!satDisabled)
+                if (wifiMan.getConfiguredNetworks() != null) {
+                    for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
+                        if (preconfigDis.SSID.contains(satSSID)) {
+                            Log.d("WifiPreference", "2) disabling "+preconfigDis.SSID);
+                            wifiMan.disableNetwork(preconfigDis.networkId);
+                        }
                     }
+                    satDisabled = true;
                 }
-            }
             Log.d("WifiPreference", "handlerCheck was just disabled");
         }
         //}
@@ -478,26 +483,30 @@ public class NetworkManager extends CordovaPlugin {
                 // Disable all satellite WiFi Access points and handler method if cellular is available
                 if (mobileDataEnabled) {
                     // Disable all "exp" SSIDs (disable all satellite terminals)
-                    if (wifiMan.getConfiguredNetworks() != null) {
-                        for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
-                            if (preconfigDis2.SSID.contains(satSSID)) {
-                                Log.d("WifiPreference", "4) disabling "+preconfigDis2.SSID);
-                                wifiMan.disableNetwork(preconfigDis2.networkId);
+                    if(!satDisabled)
+                        if (wifiMan.getConfiguredNetworks() != null) {
+                            for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
+                                if (preconfigDis2.SSID.contains(satSSID)) {
+                                    Log.d("WifiPreference", "4) disabling "+preconfigDis2.SSID);
+                                    wifiMan.disableNetwork(preconfigDis2.networkId);
+                                }
                             }
+                            satDisabled = true;
                         }
-                    }
                     handlerCheckEnabled = false;
                     Log.d("WifiPreference", "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
-                    if (wifiMan.getConfiguredNetworks() != null) {
-                        for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
-                            Log.d("wifiPreference", "CHECKING if should enable SSID: "+preconfigEna.SSID);
-                            if (preconfigEna.SSID.contains(satSSID)) {
-                                Log.d("wifiPreference", "enabling SSID: "+preconfigEna.SSID);
-                                wifiMan.enableNetwork(preconfigEna.networkId, true);
+                    if(satDisabled)
+                        if (wifiMan.getConfiguredNetworks() != null) {
+                            for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
+                                Log.d("wifiPreference", "CHECKING if should enable SSID: "+preconfigEna.SSID);
+                                if (preconfigEna.SSID.contains(satSSID)) {
+                                    Log.d("wifiPreference", "enabling SSID: "+preconfigEna.SSID);
+                                    wifiMan.enableNetwork(preconfigEna.networkId, true);
+                                }
                             }
+                            satDisabled = false;
                         }
-                    }
                 }
             }
             handler.postDelayed(this, handlerDelay); // Check again after every 50 seconds
