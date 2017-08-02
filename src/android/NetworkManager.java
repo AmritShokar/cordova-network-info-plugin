@@ -138,6 +138,7 @@ public class NetworkManager extends CordovaPlugin {
         // Initially disable all satellite Access Points
         for (WifiConfiguration preconfigDisInit: wifiMan.getConfiguredNetworks()) {
             if (preconfigDisInit.SSID.contains(satSSID)) {
+                Log.d("WifiPreference", "1) disabling "+preconfigDisInit.SSID);
                 wifiMan.disableNetwork(preconfigDisInit.networkId);
             }
         }
@@ -259,8 +260,10 @@ public class NetworkManager extends CordovaPlugin {
             // Disable satellite AP again if WiFi toggled back on
             if (wifiMan.getConfiguredNetworks() != null) {
                 for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                    if (preconfigDis.SSID.contains(satSSID))
+                    if (preconfigDis.SSID.contains(satSSID)) {
+                        Log.d("WifiPreference", "2) disabling "+preconfigDisInit.SSID);
                         wifiMan.disableNetwork(preconfigDis.networkId);
+                    }
                 }
             }
             Log.d("WifiPreference", "handlerCheck was just disabled");
@@ -421,8 +424,10 @@ public class NetworkManager extends CordovaPlugin {
                 // Disable all "exp" SSIDs (disable all satellite terminals)
                 if (wifiMan.getConfiguredNetworks() != null) {
                     for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                        if (preconfigDis.SSID.contains(satSSID))
+                        if (preconfigDis.SSID.contains(satSSID)) {
+                            Log.d("WifiPreference", "3) disabling "+preconfigDisInit.SSID);
                             wifiMan.disableNetwork(preconfigDis.networkId);
+                        }
                     }
                 }
                 handlerCheckEnabled = false;
@@ -475,8 +480,10 @@ public class NetworkManager extends CordovaPlugin {
                     // Disable all "exp" SSIDs (disable all satellite terminals)
                     if (wifiMan.getConfiguredNetworks() != null) {
                         for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                            if (preconfigDis.SSID.contains(satSSID))
+                            if (preconfigDis.SSID.contains(satSSID)) {
+                                Log.d("WifiPreference", "4) disabling "+preconfigDisInit.SSID);
                                 wifiMan.disableNetwork(preconfigDis.networkId);
+                            }
                         }
                     }
                     handlerCheckEnabled = false;
