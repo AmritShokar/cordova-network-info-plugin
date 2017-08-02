@@ -261,7 +261,7 @@ public class NetworkManager extends CordovaPlugin {
             if (wifiMan.getConfiguredNetworks() != null) {
                 for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
                     if (preconfigDis.SSID.contains(satSSID)) {
-                        Log.d("WifiPreference", "2) disabling "+preconfigDisInit.SSID);
+                        Log.d("WifiPreference", "2) disabling "+preconfigDis.SSID);
                         wifiMan.disableNetwork(preconfigDis.networkId);
                     }
                 }
@@ -423,10 +423,10 @@ public class NetworkManager extends CordovaPlugin {
             if (mobileDataEnabled) {
                 // Disable all "exp" SSIDs (disable all satellite terminals)
                 if (wifiMan.getConfiguredNetworks() != null) {
-                    for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                        if (preconfigDis.SSID.contains(satSSID)) {
-                            Log.d("WifiPreference", "3) disabling "+preconfigDisInit.SSID);
-                            wifiMan.disableNetwork(preconfigDis.networkId);
+                    for (WifiConfiguration preconfigDisx : wifiMan.getConfiguredNetworks()) {
+                        if (preconfigDisx.SSID.contains(satSSID)) {
+                            Log.d("WifiPreference", "3) disabling "+preconfigDisx.SSID);
+                            wifiMan.disableNetwork(preconfigDisx.networkId);
                         }
                     }
                 }
@@ -479,10 +479,10 @@ public class NetworkManager extends CordovaPlugin {
                 if (mobileDataEnabled) {
                     // Disable all "exp" SSIDs (disable all satellite terminals)
                     if (wifiMan.getConfiguredNetworks() != null) {
-                        for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                            if (preconfigDis.SSID.contains(satSSID)) {
-                                Log.d("WifiPreference", "4) disabling "+preconfigDisInit.SSID);
-                                wifiMan.disableNetwork(preconfigDis.networkId);
+                        for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
+                            if (preconfigDis2.SSID.contains(satSSID)) {
+                                Log.d("WifiPreference", "4) disabling "+preconfigDis2.SSID);
+                                wifiMan.disableNetwork(preconfigDis2.networkId);
                             }
                         }
                     }
