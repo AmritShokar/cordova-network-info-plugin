@@ -491,8 +491,11 @@ public class NetworkManager extends CordovaPlugin {
                 } else { // Otherwise enable all satellite terminals
                     if (wifiMan.getConfiguredNetworks() != null) {
                         for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
-                            if (preconfigEna.SSID.contains(satSSID))
+                            Log.d("wifiPreference", "CHECKING if should enable SSID: "+preconfigEna.SSID);
+                            if (preconfigEna.SSID.contains(satSSID)) {
+                                Log.d("wifiPreference", "enabling SSID: "+preconfigEna.SSID);
                                 wifiMan.enableNetwork(preconfigEna.networkId, true);
+                            }
                         }
                     }
                 }
