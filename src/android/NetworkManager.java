@@ -106,7 +106,7 @@ public class NetworkManager extends CordovaPlugin {
 
     // Custom configuration settings
     private final String satSSID = "YodelMe"; // Satellite SSID
-    private final int handlerDelay = 300000; // Run handler every 5 mins
+    private final int handlerDelay = 180000; // Run handler every 5 mins
 
     private static final String SWITCH_TAG = "WiFiPreference";
 
