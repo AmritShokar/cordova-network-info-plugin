@@ -414,12 +414,9 @@ public class NetworkManager extends CordovaPlugin {
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
                                 //Log.d(SWITCH_TAG, "CHECKING if should enable SSID: "+preconfigEna.SSID);
-                                boolean attemptConnect = true;
                                 if (preconfigEna.SSID.contains(satSSID)) {
-                                    Log.d(SWITCH_TAG, "enabling "+preconfigEna.SSID+" status: "+preconfigEna.status);
+                                    Log.d(SWITCH_TAG, "enabling "+preconfigEna.SSID);
                                     wifiMan.enableNetwork(preconfigEna.networkId, true);
-                                    if(attemptConnect)
-                                        attemptConnect = false;
                                 }
                             }
                             satDisabled = false;
