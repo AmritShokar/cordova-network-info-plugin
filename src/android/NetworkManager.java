@@ -380,6 +380,7 @@ public class NetworkManager extends CordovaPlugin {
                     if (handlerCellCheckEnabled) {
                         handlerCellCheckEnabled = false;
                         handler.postDelayed(this, 3000); // After WiFi updates check
+                        //return;
                     }
                     handlerCellCheckEnabled = true;
 
@@ -398,6 +399,7 @@ public class NetworkManager extends CordovaPlugin {
                 if (mobileDataEnabled) {
                     // Disable all "exp" SSIDs (disable all satellite terminals)
                     if(!satDisabled)
+                        Log.d(SWITCH_TAG, "SEE THIS PLS");
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
                                 if (preconfigDis2.SSID.contains(satSSID)) {
@@ -411,6 +413,7 @@ public class NetworkManager extends CordovaPlugin {
                     //Log.d(SWITCH_TAG, "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
                     if(satDisabled)
+                        Log.d(SWITCH_TAG, "NOT SEE THIS PLS");
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
                                 //Log.d(SWITCH_TAG, "CHECKING if should enable SSID: "+preconfigEna.SSID);
