@@ -250,29 +250,14 @@ public class NetworkManager extends CordovaPlugin {
             }
 
             //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() mobileDataEnabled: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
-        }
-        //Log.d("WifiPreference", "updateConnectionInfo: MobileDataEnabled: "+mobileDataEnabled);
-        // Run handler logic when standard WiFi not active or when mobile data not available
-        if (!mobileDataEnabled) {
-            // Enable handler or keep handler running
-            handlerCheckEnabled = true;
-            //Log.d("WifiPreference", "handlerCheck was just renabled");
-        } else {
-            // Handler disabled only when both standard WiFi is active and cellular is available
-            // Disable handler or keep handler disabled
-            handlerCheckEnabled = false;
-            // Disable satellite AP again if WiFi toggled back on
-            if(!satDisabled)
-                if (wifiMan.getConfiguredNetworks() != null) {
-                    for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
-                        if (preconfigDis.SSID.contains(satSSID)) {
-                            Log.d(SWITCH_TAG, "2) disabling "+preconfigDis.SSID);
-                            wifiMan.disableNetwork(preconfigDis.networkId);
-                        }
-                    }
-                    satDisabled = true;
-                }
-            //Log.d("WifiPreference", "handlerCheck was just disabled");
+        
+            //Log.d("WifiPreference", "updateConnectionInfo: MobileDataEnabled: "+mobileDataEnabled);
+            // Run handler logic when standard WiFi not active or when mobile data not available
+            if (!mobileDataEnabled) {
+                // Enable handler or keep handler running
+                handlerCheckEnabled = true;
+                //Log.d("WifiPreference", "handlerCheck was just renabled");
+            }
         }
     }
 
@@ -386,7 +371,7 @@ public class NetworkManager extends CordovaPlugin {
             //checkCellularConnection();
             if (handlerCheckEnabled) {
                 Log.d(SWITCH_TAG, "handler checking cellular state");
-                Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled+" "+satDisabled, Toast.LENGTH_SHORT).show();
                 // First check if cellular is enabled in settings
                 if (checkCellularEnabled()) {
                     // Check if cellular data is suspended (loss of cellular network)
