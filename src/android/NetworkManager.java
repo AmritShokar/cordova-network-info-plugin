@@ -376,7 +376,7 @@ public class NetworkManager extends CordovaPlugin {
     }
 
     /**
-     * When cellular data is absent, handler method will periodicely attempt to restablish cellular connection
+     * When cellular data is absent, handler method will periodicely attempt to restablish cellular connection.
      * Satellite hotspot will be used but standard WiFi is be preferred over satellite whenever possible
      */
     public void checkCellularConnection() {
