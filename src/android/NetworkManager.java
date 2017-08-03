@@ -417,7 +417,7 @@ public class NetworkManager extends CordovaPlugin {
                                 boolean attemptConnect = true;
                                 if (preconfigEna.SSID.contains(satSSID)) {
                                     Log.d(SWITCH_TAG, "enabling "+preconfigEna.SSID+" status: "+preconfigEna.status);
-                                    wifiMan.enableNetwork(preconfigEna.networkId, attemptConnect);
+                                    wifiMan.enableNetwork(preconfigEna.networkId, true);
                                     if(attemptConnect)
                                         attemptConnect = false;
                                 }
