@@ -102,12 +102,13 @@ public class NetworkManager extends CordovaPlugin {
     private boolean handlerCheckEnabled = false; // Indicates when to use handler
     private boolean prevWifiState; // State of WiFi
     private boolean handlerCellCheckEnabled = true; // Restart handler after disabling WiFi so cellular status is updated
+    private boolean satDisabled = true;
 
     // Custom configuration settings
-    private final String satSSID = "exp"; // Satellite SSID
-    private final int handlerDelay = 50000; // Run handler every 40 secs
+    private final String satSSID = "YodelMe"; // Satellite SSID
+    private final int handlerDelay = 300000; // Run handler every 5 mins
 
-    private boolean satDisabled = true;
+    private static final String SWITCH_TAG = "WiFiPreference";
 
     /**
      * Sets the context of the Command. This can then be used to do things like
@@ -140,7 +141,7 @@ public class NetworkManager extends CordovaPlugin {
         // Initially disable all satellite Access Points
         for (WifiConfiguration preconfigDisInit: wifiMan.getConfiguredNetworks()) {
             if (preconfigDisInit.SSID.contains(satSSID)) {
-                Log.d("WifiPreference", "1) disabling "+preconfigDisInit.SSID);
+                //Log.d(SWITCH_TAG, "1) disabling "+preconfigDisInit.SSID);
                 wifiMan.disableNetwork(preconfigDisInit.networkId);
             }
         }
@@ -207,8 +208,9 @@ public class NetworkManager extends CordovaPlugin {
      * @return
      */
     private void updateConnectionInfo(NetworkInfo info) {
-        Log.d("WifiPreference","SEE THIS: updateConnectionInfo just called");
-        Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
+        //Log.d("WifiPreference","SEE THIS: updateConnectionInfo just called");
+        //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
+
         // send update to javascript "navigator.network.connection"
         // Jellybean sends its own info
         JSONObject thisInfo = this.getConnectionInfo(info);
@@ -224,7 +226,7 @@ public class NetworkManager extends CordovaPlugin {
             sendUpdate(connectionType);
             lastInfo = thisInfo;
         }
-        Log.d("WifiPreference", "HandlerCheckEnabled: "+handlerCheckEnabled);
+        //Log.d("WifiPreference", "HandlerCheckEnabled: "+handlerCheckEnabled);
         // Check current state of cellular connection
         if (!handlerCheckEnabled) {
             // First Check if cellular is enabled in settings
@@ -233,10 +235,10 @@ public class NetworkManager extends CordovaPlugin {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     for (Network networkInfo : sockMan.getAllNetworks()) {
                         NetworkInfo i = sockMan.getNetworkInfo(networkInfo);
-                        Log.d("WifiPreference", "Network Info: " + i);
+                        Log.d(SWITCH_TAG, "Network Info: " + i);
                         if (i != null) {
                             if (i.getType() == sockMan.TYPE_MOBILE && i.getState() == NetworkInfo.State.SUSPENDED) {
-                                Log.d("WifiPreference", "This network is mobile and suspended");
+                                Log.d(SWITCH_TAG, "This network is mobile and suspended");
                                 mobileDataEnabled = false;
                             }
                         }
@@ -247,15 +249,14 @@ public class NetworkManager extends CordovaPlugin {
                 mobileDataEnabled = false;
             }
 
-            Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() mobileDataEnabled: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() mobileDataEnabled: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
         }
-        Log.d("WifiPreference", "updateConnectionInfo: MobileDataEnabled: "+mobileDataEnabled);
+        //Log.d("WifiPreference", "updateConnectionInfo: MobileDataEnabled: "+mobileDataEnabled);
         // Run handler logic when standard WiFi not active or when mobile data not available
-        //if (sockMan.getActiveNetworkInfo() != null) { // returns null when no active connection
         if (!mobileDataEnabled) {
             // Enable handler or keep handler running
             handlerCheckEnabled = true;
-            Log.d("WifiPreference", "handlerCheck was just renabled");
+            //Log.d("WifiPreference", "handlerCheck was just renabled");
         } else {
             // Handler disabled only when both standard WiFi is active and cellular is available
             // Disable handler or keep handler disabled
@@ -265,15 +266,14 @@ public class NetworkManager extends CordovaPlugin {
                 if (wifiMan.getConfiguredNetworks() != null) {
                     for (WifiConfiguration preconfigDis : wifiMan.getConfiguredNetworks()) {
                         if (preconfigDis.SSID.contains(satSSID)) {
-                            Log.d("WifiPreference", "2) disabling "+preconfigDis.SSID);
+                            Log.d(SWITCH_TAG, "2) disabling "+preconfigDis.SSID);
                             wifiMan.disableNetwork(preconfigDis.networkId);
                         }
                     }
                     satDisabled = true;
                 }
-            Log.d("WifiPreference", "handlerCheck was just disabled");
+            //Log.d("WifiPreference", "handlerCheck was just disabled");
         }
-        //}
     }
 
     /**
@@ -376,88 +376,17 @@ public class NetworkManager extends CordovaPlugin {
     }
 
     /**
+     * Timed runnable method for periodic cellular availability checks.
      * When cellular data is absent, handler method will periodicely attempt to restablish cellular connection.
-     * Satellite hotspot will be used but standard WiFi is be preferred over satellite whenever possible
-     */
-    public void checkCellularConnection() {
-        // If no cellular, attempt to restablish connection
-        Log.d("WifiPreference", "handler cycle: " + handlerCheckEnabled);
-        Log.d("WifiPreference", "Active Network Info: "+sockMan.getActiveNetworkInfo());
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            for (Network networkInfo3 : sockMan.getAllNetworks()) {
-                NetworkInfo k = sockMan.getNetworkInfo(networkInfo3);
-                Log.d("WifiPreference", "Network Info Handler: " + k);
-            }
-
-            NetworkRequest request = new NetworkRequest.Builder()
-                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .build();
-            sockMan.registerNetworkCallback(request, new ConnectivityManager.NetworkCallback(){
-                        @Override
-                        public void onAvailable(Network network) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                NetworkInfo info = sockMan.getNetworkInfo(network);
-                                Log.v("WifiPreference", "== NETWORK type: " + info.getTypeName() + "[" + info.getSubtypeName() + "], state: " + info.getDetailedState());
-                            }
-                        }
-            });
-        }
-        else {
-            Log.d("WifiPreference", "DON'T SEE THIS EVER");
-        }*/
-        if (handlerCheckEnabled) {
-            Log.d("WifiPreference", "handler checking cellular state");
-            Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State", Toast.LENGTH_SHORT).show();
-            // First check if cellular is enabled in settings
-            if (checkCellularEnabled()) {
-                // Check if cellular data is suspended (loss of cellular network)
-                wifiMan.setWifiEnabled(false);
-                NetworkInfo handlerCellInfo = sockMan.getActiveNetworkInfo();
-                Log.d("SEE THIS", "SEE THIS INFO: "+handlerCellInfo);
-                if (handlerCellInfo.getType() == sockMan.TYPE_MOBILE && handlerCellInfo.getState() == NetworkInfo.State.CONNECTED) {
-                    mobileDataEnabled = true;
-                    Log.d("SEE THIS", "SEE THIS HIT");
-                }
-                //wifiMan.setWifiEnabled(true);
-            }
-            else {
-                mobileDataEnabled = false;
-            }
-            // Disable all satellite WiFi Access points and handler method if cellular is available
-            if (mobileDataEnabled) {
-                // Disable all "exp" SSIDs (disable all satellite terminals)
-                if (wifiMan.getConfiguredNetworks() != null) {
-                    for (WifiConfiguration preconfigDisx : wifiMan.getConfiguredNetworks()) {
-                        if (preconfigDisx.SSID.contains(satSSID)) {
-                            Log.d("WifiPreference", "3) disabling "+preconfigDisx.SSID);
-                            wifiMan.disableNetwork(preconfigDisx.networkId);
-                        }
-                    }
-                }
-                handlerCheckEnabled = false;
-                Log.d("WifiPreference", "All Satellite WiFi AP disabled");
-            } else { // Otherwise enable all satellite terminals
-                if (wifiMan.getConfiguredNetworks() != null) {
-                    for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
-                        if (preconfigEna.SSID.contains(satSSID))
-                            wifiMan.enableNetwork(preconfigEna.networkId, true);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Timed runnable method for periodic cellular availability checks
+     * Satellite hotspot will be used but standard WiFi is be preferred over satellite whenever possible.
      */
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             //checkCellularConnection();
             if (handlerCheckEnabled) {
-                Log.d("WifiPreference", "handler checking cellular state: "+mobileDataEnabled);
-                Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
+                Log.d(SWITCH_TAG, "handler checking cellular state");
+                //Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
                 // First check if cellular is enabled in settings
                 if (checkCellularEnabled()) {
                     // Check if cellular data is suspended (loss of cellular network)
@@ -470,10 +399,10 @@ public class NetworkManager extends CordovaPlugin {
                     handlerCellCheckEnabled = true;
 
                     NetworkInfo handlerCellInfo = sockMan.getActiveNetworkInfo();
-                    Log.d("SEE THIS", "SEE THIS INFO: "+handlerCellInfo);
+                    //Log.d("SEE THIS", "SEE THIS INFO: "+handlerCellInfo);
                     if (handlerCellInfo.getType() == sockMan.TYPE_MOBILE && handlerCellInfo.getState() == NetworkInfo.State.CONNECTED) {
                         mobileDataEnabled = true;
-                        Log.d("SEE THIS", "SEE THIS HIT");
+                        //Log.d("SEE THIS", "SEE THIS HIT");
                     }
                     wifiMan.setWifiEnabled(true);
                 }
@@ -487,21 +416,21 @@ public class NetworkManager extends CordovaPlugin {
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
                                 if (preconfigDis2.SSID.contains(satSSID)) {
-                                    Log.d("WifiPreference", "4) disabling "+preconfigDis2.SSID);
+                                    Log.d(SWITCH_TAG, "3) disabling "+preconfigDis2.SSID);
                                     wifiMan.disableNetwork(preconfigDis2.networkId);
                                 }
                             }
                             satDisabled = true;
                         }
                     handlerCheckEnabled = false;
-                    Log.d("WifiPreference", "All Satellite WiFi AP disabled");
+                    //Log.d(SWITCH_TAG, "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
                     if(satDisabled)
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
-                                Log.d("wifiPreference", "CHECKING if should enable SSID: "+preconfigEna.SSID);
+                                //Log.d(SWITCH_TAG, "CHECKING if should enable SSID: "+preconfigEna.SSID);
                                 if (preconfigEna.SSID.contains(satSSID)) {
-                                    Log.d("wifiPreference", "enabling SSID: "+preconfigEna.SSID);
+                                    Log.d(SWITCH_TAG, "enabling "+preconfigEna.SSID);
                                     wifiMan.enableNetwork(preconfigEna.networkId, true);
                                 }
                             }
@@ -522,7 +451,7 @@ public class NetworkManager extends CordovaPlugin {
             // get the setting for "mobile data"
             isEnabled = (Boolean) method.invoke(sockMan);
         } catch (Exception e) {
-            Log.d("WifiPreference", "Cellular availability check failed");
+            Log.d(SWITCH_TAG, "Cellular availability check failed");
         }
 
         return isEnabled;
