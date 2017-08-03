@@ -209,7 +209,7 @@ public class NetworkManager extends CordovaPlugin {
      */
     private void updateConnectionInfo(NetworkInfo info) {
         //Log.d("WifiPreference","SEE THIS: updateConnectionInfo just called");
-        //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
+        Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
 
         // send update to javascript "navigator.network.connection"
         // Jellybean sends its own info
@@ -386,7 +386,7 @@ public class NetworkManager extends CordovaPlugin {
             //checkCellularConnection();
             if (handlerCheckEnabled) {
                 Log.d(SWITCH_TAG, "handler checking cellular state");
-                //Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
                 // First check if cellular is enabled in settings
                 if (checkCellularEnabled()) {
                     // Check if cellular data is suspended (loss of cellular network)
