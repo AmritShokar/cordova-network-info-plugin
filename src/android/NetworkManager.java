@@ -386,7 +386,7 @@ public class NetworkManager extends CordovaPlugin {
             //checkCellularConnection();
             if (handlerCheckEnabled) {
                 Log.d(SWITCH_TAG, "handler checking cellular state");
-                Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
                 // First check if cellular is enabled in settings
                 if (checkCellularEnabled()) {
                     // Check if cellular data is suspended (loss of cellular network)
