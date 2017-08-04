@@ -409,8 +409,12 @@ public class NetworkManager extends CordovaPlugin {
                                 }
                             }
                             satDisabled = true;
+                            handlerCheckEnabled = false;
                         }
-                    handlerCheckEnabled = false;
+                        else {
+                            Log.d(SWITCH_TAG, "wifiManager configured networks list is null");
+                            handlerCheckEnabled = true;
+                        }
                     //Log.d(SWITCH_TAG, "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
                     if(satDisabled)
