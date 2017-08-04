@@ -100,13 +100,11 @@ public class NetworkManager extends CordovaPlugin {
     Handler handler; // Initiated when there is no cellular present
     private boolean mobileDataEnabled = true; // Assume enabled
     private boolean handlerCheckEnabled = false; // Indicates when to use handler
-    private boolean prevWifiState; // State of WiFi
-    private boolean handlerCellCheckEnabled = true; // Restart handler after disabling WiFi so cellular status is updated
     private boolean satDisabled = true;
 
     // Custom configuration settings
-    private final String satSSID = "YodelMe"; // Satellite SSID
-    private final int handlerDelay = 50000; // Run handler every 50 secs
+    private final String satSSID = "YodelMe"; // Satellite SSID substring
+    private final int handlerDelay = 40000; // Run handler every 40 secs
 
     private static final String SWITCH_TAG = "WiFiPreference";
 
@@ -209,7 +207,7 @@ public class NetworkManager extends CordovaPlugin {
      */
     private void updateConnectionInfo(NetworkInfo info) {
         //Log.d("WifiPreference","SEE THIS: updateConnectionInfo just called");
-        Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
 
         // send update to javascript "navigator.network.connection"
         // Jellybean sends its own info
@@ -368,29 +366,33 @@ public class NetworkManager extends CordovaPlugin {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            //checkCellularConnection();
             if (handlerCheckEnabled) {
                 Log.d(SWITCH_TAG, "handler checking cellular state");
-                Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Checking Cell State: "+mobileDataEnabled+" "+satDisabled, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Check: mobileDataEnabled: "+
+                //        mobileDataEnabled+" satDisabled: "+satDisabled+" checkCellularEnabled: "+checkCellularEnabled(), Toast.LENGTH_SHORT).show();
                 // First check if cellular is enabled in settings
                 if (checkCellularEnabled()) {
                     // Check if cellular data is suspended (loss of cellular network)
                     wifiMan.setWifiEnabled(false);
-                    // Used to repeat handler check in order to allow time for configured networks to update
-                    if (handlerCellCheckEnabled) {
-                        handlerCellCheckEnabled = false;
-                        handler.postDelayed(this, 3000); // After WiFi updates check
-                        //return;
+                    // Used to allow time for configured networks to update
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    handlerCellCheckEnabled = true;
 
                     NetworkInfo handlerCellInfo = sockMan.getActiveNetworkInfo();
                     //Log.d("SEE THIS", "SEE THIS INFO: "+handlerCellInfo);
                     if (handlerCellInfo.getType() == sockMan.TYPE_MOBILE && handlerCellInfo.getState() == NetworkInfo.State.CONNECTED) {
                         mobileDataEnabled = true;
-                        //Log.d("SEE THIS", "SEE THIS HIT");
                     }
                     wifiMan.setWifiEnabled(true);
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 else {
                     mobileDataEnabled = false;
@@ -400,7 +402,6 @@ public class NetworkManager extends CordovaPlugin {
                     // Disable all "exp" SSIDs (disable all satellite terminals)
                     if(!satDisabled)
                         if (wifiMan.getConfiguredNetworks() != null) {
-                            Log.d(SWITCH_TAG, "SEE THIS PLS");
                             for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
                                 if (preconfigDis2.SSID.contains(satSSID)) {
                                     Log.d(SWITCH_TAG, "disabling "+preconfigDis2.SSID);
@@ -409,9 +410,6 @@ public class NetworkManager extends CordovaPlugin {
                             }
                             satDisabled = true;
                             handlerCheckEnabled = false;
-                        } else {
-                            Log.d(SWITCH_TAG, "wifiManager configured networks list is null");
-                            handlerCheckEnabled = true;
                         }
                     //Log.d(SWITCH_TAG, "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
@@ -428,7 +426,7 @@ public class NetworkManager extends CordovaPlugin {
                         }
                 }
             }
-            handler.postDelayed(this, handlerDelay); // Check again after every 50 seconds
+            handler.postDelayed(this, handlerDelay); // Check again after every 40 seconds
         }
     };
 
