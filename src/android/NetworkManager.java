@@ -106,7 +106,7 @@ public class NetworkManager extends CordovaPlugin {
 
     // Custom configuration settings
     private final String satSSID = "YodelMe"; // Satellite SSID
-    private final int handlerDelay = 60000; // Run handler every 5 mins
+    private final int handlerDelay = 50000; // Run handler every 50 secs
 
     private static final String SWITCH_TAG = "WiFiPreference";
 
@@ -401,9 +401,10 @@ public class NetworkManager extends CordovaPlugin {
                     if(!satDisabled)
                         Log.d(SWITCH_TAG, "SEE THIS PLS");
                         if (wifiMan.getConfiguredNetworks() != null) {
+                            Log.d(SWITCH_TAG, "SEE THIS PLS 2");
                             for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
                                 if (preconfigDis2.SSID.contains(satSSID)) {
-                                    Log.d(SWITCH_TAG, "3) disabling "+preconfigDis2.SSID);
+                                    Log.d(SWITCH_TAG, "disabling "+preconfigDis2.SSID);
                                     wifiMan.disableNetwork(preconfigDis2.networkId);
                                 }
                             }
