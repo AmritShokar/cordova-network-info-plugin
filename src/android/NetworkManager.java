@@ -399,9 +399,8 @@ public class NetworkManager extends CordovaPlugin {
                 if (mobileDataEnabled) {
                     // Disable all "exp" SSIDs (disable all satellite terminals)
                     if(!satDisabled)
-                        Log.d(SWITCH_TAG, "SEE THIS PLS");
                         if (wifiMan.getConfiguredNetworks() != null) {
-                            Log.d(SWITCH_TAG, "SEE THIS PLS 2");
+                            Log.d(SWITCH_TAG, "SEE THIS PLS");
                             for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
                                 if (preconfigDis2.SSID.contains(satSSID)) {
                                     Log.d(SWITCH_TAG, "disabling "+preconfigDis2.SSID);
@@ -410,8 +409,7 @@ public class NetworkManager extends CordovaPlugin {
                             }
                             satDisabled = true;
                             handlerCheckEnabled = false;
-                        }
-                        else {
+                        } else {
                             Log.d(SWITCH_TAG, "wifiManager configured networks list is null");
                             handlerCheckEnabled = true;
                         }
