@@ -416,7 +416,6 @@ public class NetworkManager extends CordovaPlugin {
                     //Log.d(SWITCH_TAG, "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
                     if(satDisabled)
-                        Log.d(SWITCH_TAG, "NOT SEE THIS PLS");
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
                                 //Log.d(SWITCH_TAG, "CHECKING if should enable SSID: "+preconfigEna.SSID);
