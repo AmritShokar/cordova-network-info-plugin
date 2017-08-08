@@ -139,7 +139,6 @@ public class NetworkManager extends CordovaPlugin {
         // Initially disable all satellite Access Points
         for (WifiConfiguration preconfigDisInit: wifiMan.getConfiguredNetworks()) {
             if (preconfigDisInit.SSID.contains(satSSID)) {
-                //Log.d(SWITCH_TAG, "1) disabling "+preconfigDisInit.SSID);
                 wifiMan.disableNetwork(preconfigDisInit.networkId);
             }
         }
@@ -181,9 +180,6 @@ public class NetworkManager extends CordovaPlugin {
      * Stop network receiver.
      */
     public void onDestroy() {
-
-        //wifiMan.removeNetwork(satNetId);
-
         if (this.receiver != null) {
             try {
                 webView.getContext().unregisterReceiver(this.receiver);
@@ -206,7 +202,7 @@ public class NetworkManager extends CordovaPlugin {
      * @return
      */
     private void updateConnectionInfo(NetworkInfo info) {
-        //Log.d("WifiPreference","SEE THIS: updateConnectionInfo just called");
+        //Log.d("WifiPreference","updateConnectionInfo just called");
         //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() just called", Toast.LENGTH_SHORT).show();
 
         // send update to javascript "navigator.network.connection"
@@ -224,7 +220,6 @@ public class NetworkManager extends CordovaPlugin {
             sendUpdate(connectionType);
             lastInfo = thisInfo;
         }
-        //Log.d("WifiPreference", "HandlerCheckEnabled: "+handlerCheckEnabled);
         // Check current state of cellular connection
         if (!handlerCheckEnabled) {
             // First Check if cellular is enabled in settings
@@ -233,10 +228,10 @@ public class NetworkManager extends CordovaPlugin {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     for (Network networkInfo : sockMan.getAllNetworks()) {
                         NetworkInfo i = sockMan.getNetworkInfo(networkInfo);
-                        Log.d(SWITCH_TAG, "Network Info: " + i);
+                        //Log.d(SWITCH_TAG, "Network Info: " + i);
                         if (i != null) {
                             if (i.getType() == sockMan.TYPE_MOBILE && i.getState() == NetworkInfo.State.SUSPENDED) {
-                                Log.d(SWITCH_TAG, "This network is mobile and suspended");
+                                //Log.d(SWITCH_TAG, "This network is mobile and suspended");
                                 mobileDataEnabled = false;
                             }
                         }
@@ -246,15 +241,10 @@ public class NetworkManager extends CordovaPlugin {
             else {
                 mobileDataEnabled = false;
             }
-
-            //Toast.makeText(cordova.getActivity().getApplicationContext(), "updateConnectionInfo() mobileDataEnabled: "+mobileDataEnabled, Toast.LENGTH_SHORT).show();
-        
-            //Log.d("WifiPreference", "updateConnectionInfo: MobileDataEnabled: "+mobileDataEnabled);
             // Run handler logic when standard WiFi not active or when mobile data not available
             if (!mobileDataEnabled) {
                 // Enable handler or keep handler running
                 handlerCheckEnabled = true;
-                //Log.d("WifiPreference", "handlerCheck was just renabled");
             }
         }
     }
@@ -382,11 +372,13 @@ public class NetworkManager extends CordovaPlugin {
                     }
 
                     NetworkInfo handlerCellInfo = sockMan.getActiveNetworkInfo();
-                    //Log.d("SEE THIS", "SEE THIS INFO: "+handlerCellInfo);
                     if (handlerCellInfo.getType() == sockMan.TYPE_MOBILE && handlerCellInfo.getState() == NetworkInfo.State.CONNECTED) {
                         mobileDataEnabled = true;
                     }
+                    // After checking cellular status renable wifi
                     wifiMan.setWifiEnabled(true);
+                    
+                    // Allow time for WiFi Manager to update
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException e) {
@@ -399,26 +391,24 @@ public class NetworkManager extends CordovaPlugin {
                 }
                 // Disable all satellite WiFi Access points and handler method if cellular is available
                 if (mobileDataEnabled) {
-                    // Disable all "exp" SSIDs (disable all satellite terminals)
+                    // Disable all "YodelMe" SSIDs (disable all satellite terminals)
                     if(!satDisabled)
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigDis2 : wifiMan.getConfiguredNetworks()) {
                                 if (preconfigDis2.SSID.contains(satSSID)) {
-                                    Log.d(SWITCH_TAG, "disabling "+preconfigDis2.SSID);
+                                    //Log.d(SWITCH_TAG, "disabling "+preconfigDis2.SSID);
                                     wifiMan.disableNetwork(preconfigDis2.networkId);
                                 }
                             }
                             satDisabled = true;
                             handlerCheckEnabled = false;
                         }
-                    //Log.d(SWITCH_TAG, "All Satellite WiFi AP disabled");
                 } else { // Otherwise enable all satellite terminals
                     if(satDisabled)
                         if (wifiMan.getConfiguredNetworks() != null) {
                             for (WifiConfiguration preconfigEna : wifiMan.getConfiguredNetworks()) {
-                                //Log.d(SWITCH_TAG, "CHECKING if should enable SSID: "+preconfigEna.SSID);
                                 if (preconfigEna.SSID.contains(satSSID)) {
-                                    Log.d(SWITCH_TAG, "enabling "+preconfigEna.SSID);
+                                    //Log.d(SWITCH_TAG, "enabling "+preconfigEna.SSID);
                                     wifiMan.enableNetwork(preconfigEna.networkId, true);
                                 }
                             }
