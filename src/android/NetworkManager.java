@@ -116,37 +116,49 @@ public class NetworkManager extends CordovaPlugin {
      * @param webView The CordovaWebView Cordova is running in.
      */
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        Log.d("WifiPreference","INIT 1 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         super.initialize(cordova, webView);
+        Log.d("WifiPreference","INIT 2 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         this.sockMan = (ConnectivityManager) cordova.getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        Log.d("WifiPreference","INIT 3 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         this.connectionCallbackContext = null;
+        Log.d("WifiPreference","INIT 4 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         this.wifiMan = (WifiManager) cordova.getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
+        Log.d("WifiPreference","INIT 5 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         // We need to listen to connectivity events to update navigator.connection
         IntentFilter intentFilter = new IntentFilter();
+        Log.d("WifiPreference","INIT 6 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        Log.d("WifiPreference","INIT 7 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         if (this.receiver == null) {
+            Log.d("WifiPreference","INIT 8 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
             this.receiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
+                    Log.d("WifiPreference","INIT 9 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
                     // (The null check is for the ARM Emulator, please use Intel Emulator for better results)
                     if(NetworkManager.this.webView != null)
                         updateConnectionInfo(sockMan.getActiveNetworkInfo());
                 }
             };
+            Log.d("WifiPreference","INIT 10 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
             webView.getContext().registerReceiver(this.receiver, intentFilter);
         }
 
         // Initially disable all satellite Access Points
         for (WifiConfiguration preconfigDisInit: wifiMan.getConfiguredNetworks()) {
+            Log.d("WifiPreference","INIT 11 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
             if (preconfigDisInit.SSID.contains(satSSID)) {
+                Log.d("WifiPreference","INIT 12 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
                 wifiMan.disableNetwork(preconfigDisInit.networkId);
             }
         }
         satDisabled = true; // satellites are initally disabled;
-
+        Log.d("WifiPreference","INIT 13 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
         // Initialize timed handler which checks for cellular network availability
         handler = new Handler();
         handler.postDelayed(runnable, handlerDelay);
+        Log.d("WifiPreference","INIT 14 zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
     }
 
     /**
