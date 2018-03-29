@@ -358,20 +358,21 @@ public class NetworkManager extends CordovaPlugin {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            for (WifiConfiguration network: wifiMan.getConfiguredNetworks()) {
-                if (network.SSID.contains(satSSID)) {
-//                    Log.d(SWITCH_TAG, String.valueOf(network.status));
-                    if(network.status == 1) {
-                        satDisabled = true;
-                    }
-                    else {
-                        satDisabled = false;
+            if (wifiMan.getConfiguredNetworks() != null) {
+                for (WifiConfiguration network : wifiMan.getConfiguredNetworks()) {
+                    if (network.SSID.contains(satSSID)) {
+                        Log.d(SWITCH_TAG, String.valueOf(network.status));
+                        if (network.status == 1) {
+                            satDisabled = true;
+                        } else {
+                            satDisabled = false;
+                        }
                     }
                 }
             }
 //            Log.d(SWITCH_TAG, "Handler state: "+handlerCheckEnabled);
             if (handlerCheckEnabled || !satDisabled) {
-                Log.d(SWITCH_TAG, "handler checking cellular state");
+//                Log.d(SWITCH_TAG, "handler checking cellular state");
                 //Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Check: mobileDataEnabled: "+
                 //        mobileDataEnabled+" satDisabled: "+satDisabled+" checkCellularEnabled: "+checkCellularEnabled(), Toast.LENGTH_SHORT).show();
                 // First check if cellular is enabled in settings
