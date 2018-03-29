@@ -104,7 +104,7 @@ public class NetworkManager extends CordovaPlugin {
 
     // Custom configuration settings
     private final String satSSID = "YodelMe"; // Satellite SSID substring
-    private final int handlerDelay = 40000; // Run handler every 40 secs
+    private final int handlerDelay = 20000; // Run handler every 20 secs
 
     private static final String SWITCH_TAG = "WiFiPreference";
 
@@ -358,7 +358,19 @@ public class NetworkManager extends CordovaPlugin {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (handlerCheckEnabled) {
+            for (WifiConfiguration network: wifiMan.getConfiguredNetworks()) {
+                if (network.SSID.contains(satSSID)) {
+//                    Log.d(SWITCH_TAG, String.valueOf(network.status));
+                    if(network.status == 1) {
+                        satDisabled = true;
+                    }
+                    else {
+                        satDisabled = false;
+                    }
+                }
+            }
+//            Log.d(SWITCH_TAG, "Handler state: "+handlerCheckEnabled);
+            if (handlerCheckEnabled || !satDisabled) {
                 Log.d(SWITCH_TAG, "handler checking cellular state");
                 //Toast.makeText(cordova.getActivity().getApplicationContext(), "Handler Check: mobileDataEnabled: "+
                 //        mobileDataEnabled+" satDisabled: "+satDisabled+" checkCellularEnabled: "+checkCellularEnabled(), Toast.LENGTH_SHORT).show();
@@ -393,6 +405,7 @@ public class NetworkManager extends CordovaPlugin {
                 }
                 // Disable all satellite WiFi Access points and handler method if cellular is available
                 if (mobileDataEnabled) {
+
                     // Disable all "YodelMe" SSIDs (disable all satellite terminals)
                     if(!satDisabled)
                         if (wifiMan.getConfiguredNetworks() != null) {
